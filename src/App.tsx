@@ -1,48 +1,52 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Mouse } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+
+// Mendefinisikan tipe data untuk item carousel
+interface CarouselItem {
+    id: number;
+    title: string;
+    path: string;
+}
 
 // --- DATA ITEM CAROUSEL ---
-const CAROUSEL_ITEMS = [
-    { id: 0, title: "Order Oase PPN", path: "/orderoaseppn" },
-    { id: 1, title: "Order Oase Polos", path: "/orderoasepolos" },
-    { id: 2, title: "Order MAP PPN", path: "/ordermapppn" },
-    { id: 3, title: "Order MAP Polos", path: "/ordermappolos" },
-    { id: 4, title: "Kalkulator Kontainer", path: "/fullontainer" },
-    { id: 5, title: "Update Komersil", path: "/updatekomersil" },
-    { id: 6, title: "Jadwal Abadi", path: "/jadwalabadi" },
+const CAROUSEL_ITEMS: CarouselItem[] = [
+    { id: 0, title: "Order Oase PPN", path: "https://gemini.google.com/share/dd978140e54a" },
+    { id: 1, title: "Analytics", path: "/analytics" },
+    { id: 2, title: "Products", path: "/products" },
+    { id: 3, title: "Services", path: "/services" },
+    { id: 4, title: "Portfolio", path: "/portfolio" },
+    { id: 5, title: "Projects", path: "/projects" },
+    { id: 6, title: "Team", path: "/team" },
     { id: 7, title: "Blog", path: "/blog" },
     { id: 8, title: "Contact", path: "/contact" },
     { id: 9, title: "Settings", path: "/settings" }
 ];
 
 const TOTAL_ITEMS = CAROUSEL_ITEMS.length;
-const ITEM_SPACING = 70; // Jarak antar kartu (dibuat berdekatan)
+const ITEM_SPACING = 70;
 
 export default function App() {
-    const [activeIndex, setActiveIndex] = useState(0);
-    const [navigatingTo, setNavigatingTo] = useState(null);
+    // Deklarasi State dengan tipe data spesifik
+    const [activeIndex, setActiveIndex] = useState<number>(0);
+    const [navigatingTo, setNavigatingTo] = useState<CarouselItem | null>(null);
 
-    // Refs untuk mengontrol elemen DOM secara langsung demi performa 60 FPS
-    const containerRef = useRef(null);
-    const itemRefs = useRef([]);
+    // Refs untuk mengontrol elemen DOM secara langsung
+    const containerRef = useRef<HTMLDivElement>(null);
+    const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-    // Menyimpan nilai scroll saat ini dan target (sebagai indeks float)
-    const targetScroll = useRef(0);
-    const currentScroll = useRef(0);
+    const targetScroll = useRef<number>(0);
+    const currentScroll = useRef<number>(0);
 
     // State interaksi
-    const isDragging = useRef(false);
-    const startY = useRef(0);
-    const snapTimeout = useRef(null);
-    const rafId = useRef(null);
+    const isDragging = useRef<boolean>(false);
+    const startY = useRef<number>(0);
+    const snapTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const rafId = useRef<number | null>(null);
 
-    // --- LOGIKA ANIMASI & SCROLL (60 FPS) ---
+    // --- LOGIKA ANIMASI & SCROLL ---
     useEffect(() => {
         const loop = () => {
-            // Lerp (Linear Interpolation) untuk pergerakan yang sangat smooth
             currentScroll.current += (targetScroll.current - currentScroll.current) * 0.08;
 
-            // Hitung indeks aktif saat ini
             let normalizedScroll = currentScroll.current % TOTAL_ITEMS;
             if (normalizedScroll < 0) normalizedScroll += TOTAL_ITEMS;
 
@@ -52,37 +56,28 @@ export default function App() {
                 setActiveIndex(newActiveIndex);
             }
 
-            // Update posisi dan gaya untuk setiap kartu
             CAROUSEL_ITEMS.forEach((_, i) => {
                 const el = itemRefs.current[i];
                 if (!el) return;
 
-                // Hitung jarak elemen dari posisi tengah (0)
                 let offset = ((i - currentScroll.current) % TOTAL_ITEMS + TOTAL_ITEMS) % TOTAL_ITEMS;
-
-                // Ubah menjadi rentang -TOTAL_ITEMS/2 hingga TOTAL_ITEMS/2 (supaya loop tak terbatas)
                 if (offset > TOTAL_ITEMS / 2) offset -= TOTAL_ITEMS;
 
                 const absOffset = Math.abs(offset);
-
-                // Translasi vertikal lurus (Standard Vertical)
                 const translateY = offset * ITEM_SPACING;
-
-                // Skala dan Opacity sedikit mengecil jika menjauh dari tengah untuk memberikan depth
                 const scale = Math.max(0.85, 1 - absOffset * 0.04);
                 const opacity = Math.max(0, 1 - absOffset * 0.25);
                 const zIndex = Math.round(100 - absOffset * 10);
 
-                // Terapkan modifikasi style secara langsung tanpa re-render React state
                 el.style.transform = `translateY(${translateY}px) scale(${scale})`;
-                el.style.opacity = opacity;
-                el.style.zIndex = zIndex;
+                el.style.opacity = opacity.toString();
+                el.style.zIndex = zIndex.toString();
             });
 
             rafId.current = requestAnimationFrame(loop);
         };
 
-        loop(); // Mulai loop animasi
+        loop();
 
         return () => {
             if (rafId.current) cancelAnimationFrame(rafId.current);
@@ -94,25 +89,23 @@ export default function App() {
         const container = containerRef.current;
         if (!container) return;
 
-        const handleWheel = (e) => {
+        const handleWheel = (e: WheelEvent) => {
             e.preventDefault();
-            // Menambah target scroll indeks berdasarkan kecepatan scroll mouse
             targetScroll.current += e.deltaY * 0.003;
             triggerSnap();
         };
 
-        const handleTouchStart = (e) => {
+        const handleTouchStart = (e: TouchEvent) => {
             isDragging.current = true;
             startY.current = e.touches[0].clientY;
             if (snapTimeout.current) clearTimeout(snapTimeout.current);
         };
 
-        const handleTouchMove = (e) => {
+        const handleTouchMove = (e: TouchEvent) => {
             if (!isDragging.current) return;
             const currentY = e.touches[0].clientY;
             const deltaY = startY.current - currentY;
 
-            // Mengurangi sensitivitas scroll mobile agar lebih mudah memilih
             targetScroll.current += deltaY * 0.015;
             startY.current = currentY;
         };
@@ -122,7 +115,6 @@ export default function App() {
             triggerSnap();
         };
 
-        // Auto snap / berhenti paskan ke item terdekat
         const triggerSnap = () => {
             if (snapTimeout.current) clearTimeout(snapTimeout.current);
             snapTimeout.current = setTimeout(() => {
@@ -144,21 +136,18 @@ export default function App() {
     }, []);
 
     // --- INTERAKSI KLIK ---
-    const handleItemClick = (index, item) => {
+    const handleItemClick = (index: number, item: CarouselItem) => {
         if (index === activeIndex) {
-            // Jika diklik item yang sudah di tengah
             setNavigatingTo(item);
             setTimeout(() => {
                 setNavigatingTo(null);
-                // Mengarahkan ke link setelah animasi selesai
                 if (item.path.startsWith('http')) {
-                    window.open(item.path, '_blank'); // Buka tab baru untuk link eksternal
+                    window.open(item.path, '_blank');
                 } else {
-                    window.location.href = item.path; // Navigasi ke halaman internal
+                    window.location.href = item.path;
                 }
             }, 2000);
         } else {
-            // Menghitung jarak putar terpendek menuju item yang diklik
             let diff = index - activeIndex;
             if (diff > TOTAL_ITEMS / 2) diff -= TOTAL_ITEMS;
             if (diff < -TOTAL_ITEMS / 2) diff += TOTAL_ITEMS;
@@ -172,18 +161,14 @@ export default function App() {
             ref={containerRef}
             className="relative w-screen h-screen overflow-hidden bg-[#0A0A0A] text-white font-sans selection:bg-[#00D4FF]/30"
         >
-            {/* Background Effects (Particles / Glow) */}
             <div className="absolute inset-0 z-0 pointer-events-none">
-                {/* Soft center glow */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#00D4FF] opacity-[0.03] blur-[120px] rounded-full"></div>
-                {/* Secondary background subtle gradient */}
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#151515]/50 to-[#0A0A0A]"></div>
             </div>
 
-            {/* --- DYNAMIC TITLE SECTION --- */}
             <div className="absolute top-[12%] left-0 w-full flex justify-center z-20 pointer-events-none">
                 <style>
-                    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Sixtyfour+Convergence&display=swap');
+                    {`@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Sixtyfour+Convergence&display=swap');`}
                 </style>
                 <div className="relative h-20 w-full flex justify-center items-center">
                     {CAROUSEL_ITEMS.map((item, index) => (
@@ -202,9 +187,7 @@ export default function App() {
                 </div>
             </div>
 
-            {/* --- STANDARD VERTICAL CAROUSEL SECTION --- */}
             <div className="absolute inset-0 flex items-center justify-center z-10">
-                {/* Kontainer carousel vertikal */}
                 <div className="relative w-full max-w-[260px] h-[64px] flex items-center justify-center">
                     {CAROUSEL_ITEMS.map((item, index) => {
                         const isActive = index === activeIndex;
@@ -212,7 +195,7 @@ export default function App() {
                         return (
                             <div
                                 key={`card-${item.id}`}
-                                ref={(el) => (itemRefs.current[index] = el)}
+                                ref={(el) => { itemRefs.current[index] = el; }}
                                 onClick={() => handleItemClick(index, item)}
                                 className={`absolute w-full h-full flex items-center justify-center rounded-xl cursor-pointer transition-colors duration-300 ease-out border shadow-lg
                   ${isActive
@@ -230,13 +213,10 @@ export default function App() {
                 </div>
             </div>
 
-            {/* --- INSTRUCTION FOOTER --- */}
             <div className="absolute bottom-10 left-0 w-full flex flex-col items-center justify-center text-[#A0A0A0] gap-2 z-0 pointer-events-none opacity-60">
-                <Mouse size={24} className="animate-bounce text-white/50" />
-                <p className="text-sm tracking-wide font-medium">Scroll or Swipe</p>
+                <p className="text-sm tracking-wide font-medium">Scroll atau Swipe untuk memutar</p>
             </div>
 
-            {/* --- SIMULASI NAVIGATION OVERLAY --- */}
             <div
                 className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#0A0A0A] transition-all duration-700 ease-in-out
           ${navigatingTo ? 'opacity-100 pointer-events-auto scale-100' : 'opacity-0 pointer-events-none scale-110'}
@@ -250,7 +230,7 @@ export default function App() {
                         <p className="text-xl text-[#00D4FF] font-medium tracking-widest uppercase glow-text">
                             {navigatingTo.title}
                         </p>
-                        <p className="text-[#A0A0A0] mt-4 font-mono text-sm">Navigation to {navigatingTo.path}</p>
+                        <p className="text-[#A0A0A0] mt-4 font-mono text-sm">Navigasi ke {navigatingTo.path}</p>
                     </>
                 )}
             </div>
