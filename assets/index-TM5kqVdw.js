@@ -193,7 +193,7 @@ a/c 018-225-0871
 a/n CV. Makmur abadi Palmindo
 
 2. Bank BRI
-a/c 211-0100-2157-307
+a/c 0211-0100-2157-307
 a/n CV. Makmur Abadi Palmindo
 
 3. Bank Mandiri
@@ -274,7 +274,7 @@ a/c 018-225-0871
 a/n CV. Makmur abadi Palmindo
 
 2. Bank BRI
-a/c 211-0100-2157-307
+a/c 0211-0100-2157-307
 a/n CV. Makmur Abadi Palmindo
 
 3. Bank Mandiri
