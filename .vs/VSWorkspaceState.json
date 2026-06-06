@@ -1,6 +1,10 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\src",
+    "\\src\\assets",
+    "\\src\\pages"
   ],
+  "SelectedNode": "\\src\\pages\\updatekomersil.tsx",
   "PreviewInSolutionExplorer": false
 }

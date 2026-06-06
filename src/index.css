@@ -1,8 +1,52 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* 👇 TAMBAHKAN KODE CYBERPUNK DI BAWAH INI 👇 */
 
 body {
-    margin: 0;
-    overflow: hidden; /* Mencegah scroll ganda di luar carousel */
+    background-image: radial-gradient(at 0% 0%, rgba(0, 212, 255, 0.05) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(0, 212, 255, 0.03) 0px, transparent 50%);
 }
+
+.font-sixtyfour {
+    font-family: 'Sixtyfour Convergence', sans-serif;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+.font-mono-tech {
+    font-family: 'Share Tech Mono', monospace;
+}
+
+.neon-glow-accent {
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.25);
+}
+
+.neon-glow-hover:hover {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+    border-color: #00D4FF;
+}
+
+.neon-glow-red-hover:hover {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+    border-color: #EF4444;
+}
+
+/* Custom Scrollbar untuk UI Sci-Fi */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #0A0A0A;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #151515;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 4px;
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #00D4FF;
+    }
