@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-    base: '/', // <--- UBAH KEMBALI MENJADI '/'
+    base: '/',
     plugins: [
         react(),
         VitePWA({
@@ -17,7 +17,11 @@ export default defineConfig({
                 theme_color: '#0A0A0A',
                 background_color: '#0A0A0A',
                 display: 'standalone',
-                start_url: '/', // <--- TAMBAHAN WAJIB AGAR BISA DI-INSTALL
+                // --- TAMBAHKAN 3 BARIS INI UNTUK MEMAKSA DOMAIN ---
+                start_url: '/',
+                scope: '/',
+                id: '/',
+                // -------------------------------------------------
                 icons: [
                     {
                         src: '/logo-192.png',
